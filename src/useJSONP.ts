@@ -25,21 +25,24 @@ const useJsonP = <Data>({
   callback,
   callbackParam
 }: JsonpParams<Data>) => {
-  const scriptEl = !isServer ? document.querySelector(`#${id}`) : "";
+  const scriptEl = !isServer ? document.querySelector(`#${id}`) : null;
   const callbackId = `callback_${id}`;
   const param = callbackParam || "c";
+
+  const removeScript = () => scriptEl?.remove();
 
   useEffect(() => {
     // When the component where the hook is called mounts, this adds a unique callback to the window that is invoked
     // when we append the jsonp script to the page
     window[callbackId] = (data: Data) => {
       callback(data);
+      removeScript()
     };
 
     return () => {
       // ensures we remove the jsonp callback and script tag on unmount
       window[callbackId] = undefined;
-      scriptEl && scriptEl.remove();
+      removeScript()
     };
   }, []);
 
@@ -48,6 +51,7 @@ const useJsonP = <Data>({
     if (!isServer && !scriptEl) {
       const script = window.document.createElement("script");
       script.src = `${url}&${param}=${callbackId}`;
+      script.id = id;
       document.head.appendChild(script);
     }
   };
