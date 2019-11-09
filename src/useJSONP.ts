@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 const isServer = typeof window === "undefined";
 
-type JsonpParams = {
+type JsonpParams<Data> = {
   /** The URL for the external source that runs the jsonp callback  */
   url: string;
   /** a unique id that sets a unique callback and script tag  */
   id: string;
   /** The callback that gets invoked when the external script executes */
-  callback: (data: unknown) => any;
+  callback: (data: Data) => any;
   /** ID for the callback parameter */
   callbackParam?: string;
 };
@@ -19,7 +19,12 @@ declare const window: { [key: string]: any } & Window;
  * making requests to resources from an external origin. See more info here:
  * https://en.wikipedia.org/wiki/JSONP
  */
-const useJsonP = ({ url, id, callback, callbackParam }: JsonpParams) => {
+const useJsonP = <Data>({
+  url,
+  id,
+  callback,
+  callbackParam
+}: JsonpParams<Data>) => {
   const scriptEl = !isServer ? document.querySelector(`#${id}`) : "";
   const callbackId = `callback_${id}`;
   const param = callbackParam || "c";
@@ -27,7 +32,7 @@ const useJsonP = ({ url, id, callback, callbackParam }: JsonpParams) => {
   useEffect(() => {
     // When the component where the hook is called mounts, this adds a unique callback to the window that is invoked
     // when we append the jsonp script to the page
-    window[callbackId] = (data: unknown) => {
+    window[callbackId] = (data: Data) => {
       callback(data);
     };
 
