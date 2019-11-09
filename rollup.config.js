@@ -1,7 +1,7 @@
 import typescript from "rollup-plugin-typescript";
 
 export default {
-  input: "./src/useJSONP.tsx",
+  input: "./src/useJSONP.ts",
   output: {
     dir: "dist",
     format: "cjs"
