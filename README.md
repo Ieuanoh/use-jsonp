@@ -1,4 +1,4 @@
-# react-usejsonp
+# use-jsonp
 
 A custom React hook for making [JSONP](https://en.wikipedia.org/wiki/JSONP) requests.
 
@@ -7,13 +7,13 @@ A custom React hook for making [JSONP](https://en.wikipedia.org/wiki/JSONP) requ
 Install with [npm](https://www.npmjs.com/):
 
 ```sh
-$ npm install --save react-usejsonp
+$ npm install --save use-jsonp
 ```
 
 (or [yarn](https://yarnpkg.com/)):
 
 ```sh
-$ yarn add react-usejsonp
+$ yarn add use-jsonp
 ```
 
 ## Example
