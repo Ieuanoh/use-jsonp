@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 const isServer = typeof window === "undefined";
 
 type JsonpParams<Data> = {
@@ -14,45 +14,46 @@ type JsonpParams<Data> = {
 
 declare const window: { [key: string]: any } & Window;
 
-/** A hook that allows for data to be sent using the jsonp method which makes a request from an embedded script tag
- * rather than an xmlHttprequest object - this can be used as a method of getting around issues with CORS when
- * making requests to resources from an external origin. See more info here:
- * https://en.wikipedia.org/wiki/JSONP
- */
 const useJsonP = <Data>({
   url,
   id,
   callback,
   callbackParam
 }: JsonpParams<Data>) => {
-  const scriptEl = !isServer ? document.querySelector(`#${id}`) : null;
+  const scriptEl = useRef<HTMLScriptElement | null>();
   const callbackId = `callback_${id}`;
-  const param = callbackParam || "c";
+  const param = callbackParam || "callback";
 
-  const removeScript = () => scriptEl?.remove();
+  const removeScript = () => {
+    if (scriptEl.current) {
+      document.head.removeChild(scriptEl.current);
+      scriptEl.current = null;
+    }
+  };
 
   useEffect(() => {
-    // When the component where the hook is called mounts, this adds a unique callback to the window that is invoked
-    // when we append the jsonp script to the page
+    // set the unique callback to the window that is invoked when we append the jsonp script to the page
     window[callbackId] = (data: Data) => {
       callback(data);
-      removeScript()
+      removeScript();
     };
 
     return () => {
-      // ensures we remove the jsonp callback and script tag on unmount
+      // ensures the jsonp callback and script tag are cleared on unmount
       window[callbackId] = undefined;
-      removeScript()
+      removeScript();
     };
   }, []);
 
   // appends the script tag - which is equivalant to making a request
   const send = () => {
-    if (!isServer && !scriptEl) {
+    if (!isServer && !scriptEl.current) {
       const script = window.document.createElement("script");
       script.src = `${url}&${param}=${callbackId}`;
       script.id = id;
       document.head.appendChild(script);
+      // Set the script tag to the ref object
+      scriptEl.current = script;
     }
   };
 
